@@ -28,7 +28,7 @@ int	main(int argc, char *argv[])
 	my_id   = atoi(argv[2]);
   node_id = atoi(argv[3]);
 
-  if ((heptr = gethostbyname( argv[1] )) == NULL) {
+  if ((heptr = gethostbyname(argv[1])) == NULL) {
     perror("gethostbyname failed: ");
     exit(1);
   }

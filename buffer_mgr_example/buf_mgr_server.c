@@ -13,7 +13,8 @@ int main(int argc, char *argv[])
 	DONUT			    donut;
     int    	 	        inet_sock, new_sock, out_index;
 	int			        type_val, id_val, read_val, trigger;
-    int     		    i, j, k, fromlen, nsigs, donut_num, node_id;
+    int     		    i, j, k, nsigs, donut_num, node_id;
+    socklen_t           fromlen;
     int			        wild_card = INADDR_ANY;
 	char    		    *buffer_ptr;
     struct sockaddr_in 	inet_telnum;
@@ -39,8 +40,8 @@ int main(int argc, char *argv[])
 
     for (i = 0; i < nsigs; i++) {
         sigstrc.sa_handler = sig_handler;
-        sigstrc.sa_mask = mask;
-        sigstrc.sa_flags = 0;
+        sigstrc.sa_mask    = mask;
+        sigstrc.sa_flags   = 0;
         if (sigaction(sigs[i], &sigstrc, NULL) == -1) {
             perror("can't set signals: ");
             exit(1);
@@ -96,12 +97,12 @@ int main(int argc, char *argv[])
 
 	bcopy(&wild_card, &inet_telnum.sin_addr, sizeof(int));
 	inet_telnum.sin_family = AF_INET;
-	inet_telnum.sin_port = htons( (u_short)PORT );
+	inet_telnum.sin_port   = htons((u_short)PORT);
 
 	if (bind(inet_sock, (struct sockaddr *)&inet_telnum, sizeof(struct sockaddr_in)) == -1)  {
         perror("inet_sock bind failed: ");
         sig_handler(-1);
-      }
+    }
 
 /***** allow client connect requests to arrive: call-wait 5 *****/
 
@@ -109,8 +110,8 @@ int main(int argc, char *argv[])
 
 	for (i = 0; i < NUMFLAVORS; ++i) {
         for (j = 0; j < NUMSLOTS; ++j) {
-            shared_ring->flavor[i][j].node_id = -1;
-            shared_ring->flavor[i][j].prod_id = -1;
+            shared_ring->flavor[i][j].node_id   = -1;
+            shared_ring->flavor[i][j].prod_id   = -1;
             shared_ring->flavor[i][j].donut_num = -1;
         }
 	}
@@ -142,9 +143,10 @@ int main(int argc, char *argv[])
         fromlen = sizeof(struct sockaddr);
 
         while ((new_sock = accept(inet_sock, (struct sockaddr *)&inet_telnum, &fromlen)) == -1 && errno == EINTR);
-            if (new_sock == -1) {
-                perror("accept failed: ");
-                sig_handler(-1);
+
+        if (new_sock == -1) {
+            perror("accept failed: ");
+            sig_handler(-1);
         }
 	 
         switch (fork()) {
@@ -169,7 +171,7 @@ int main(int argc, char *argv[])
 
                 switch (type_val) {
                     case PRO_JELLY: 
-                        if ( p(semid[PROD], JELLY) == -1) {
+                        if (p(semid[PROD], JELLY) == -1) {
                             perror("p operation failed: ");
                             exit(9);
                         }
