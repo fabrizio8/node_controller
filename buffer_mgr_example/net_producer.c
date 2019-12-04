@@ -4,10 +4,10 @@
 #include "buf_mgr.h"
 
 
-int	main(int argc, char *argv[])
+int main(int argc, char *argv[])
 {
 
-  int		  i,j,k,nsigs;
+  int     i,j,k,nsigs;
   MSG     msg;
   MBUF    raw;
   int     inet_sock, local_file, donut_num, node_id;
@@ -18,9 +18,9 @@ int	main(int argc, char *argv[])
   struct  sockaddr_in inet_telnum;
   struct  hostent *heptr, *gethostbyname();
   struct  timeval randtime;
-  unsigned short 	xsub1[3];
+  unsigned short  xsub1[3];
 
-  if (argc < 4){
+  if (argc < 4) {
     printf("\nUSAGE: net_producer BM_host_name prod_id node_id\n");
     exit(2);
   }
@@ -71,6 +71,7 @@ int	main(int argc, char *argv[])
 
     if (type_val != P_ACK)
       printf("\nBAD REPLY FROM BUFFER MANAGER\n");
+      
     close(inet_sock);
 
 // sleep between each donut made

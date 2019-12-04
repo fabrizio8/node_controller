@@ -8,19 +8,19 @@ void    sig_handler(int);  // clean up shm and sem resources
 
 int main(int argc, char *argv[])
 {
-    MSG     		    msg;
-    MBUF			    raw;
-    DONUT			    donut;
-    int    	 	        inet_sock, new_sock, out_index;
-    int			        type_val, id_val, read_val, trigger;
-    int     		    i, j, k, nsigs, donut_num, node_id;
+    MSG                 msg;
+    MBUF                raw;
+    DONUT               donut;
+    int                 inet_sock, new_sock, out_index;
+    int                 type_val, id_val, read_val, trigger;
+    int                 i, j, k, nsigs, donut_num, node_id;
     socklen_t           fromlen;
-    int			        wild_card = INADDR_ANY;
-    char    		    *buffer_ptr;
-    struct sockaddr_in 	inet_telnum;
-    struct hostent 		*heptr, *gethostbyname();
-    struct sigaction 	sigstrc;
-    sigset_t		    mask;
+    int                 wild_card = INADDR_ANY;
+    char                *buffer_ptr;
+    struct sockaddr_in  inet_telnum;
+    struct hostent      *heptr, *gethostbyname();
+    struct sigaction    sigstrc;
+    sigset_t            mask;
     struct donut_ring   *shared_ring;
     struct timeval      randtime;
     unsigned short      xsub1[3];

@@ -4,10 +4,10 @@
 #include "buf_mgr.h"
 
 
-int	main(int argc, char *argv[])
+int main(int argc, char *argv[])
 {
 
-	int		i,j,k,nsigs;
+    int  i,j,k,nsigs;
     int     inet_sock, local_file, donut_num, node_id;
     int     type_val, id_val, read_val, local_size, my_id;
     char    *buffer_ptr, *token_ptr, *last_token_ptr;
@@ -15,19 +15,19 @@ int	main(int argc, char *argv[])
     MSG     msg;
     MBUF    raw;
     union   type_size;
-	int     pro_id_val, pro_node_id;
+    int     pro_id_val, pro_node_id;
     struct  sockaddr_in inet_telnum;
     struct  hostent *heptr, *gethostbyname();
     struct  timeval randtime;
-	unsigned short 	xsub1[3];
+    unsigned short  xsub1[3];
 
-	if (argc < 4) {
-	  printf("\nUSAGE: net_consumer BM_host_name cons_id node_id\n");
-	  exit(2);
-	}
+    if (argc < 4) {
+        printf("\nUSAGE: net_consumer BM_host_name cons_id node_id\n");
+        exit(2);
+    }
 
-	my_id   = atoi(argv[2]);
-	node_id = atoi(argv[3]);
+    my_id   = atoi(argv[2]);
+    node_id = atoi(argv[3]);
 
     if ((heptr = gethostbyname(argv[1])) == NULL) {
         perror("gethostbyname failed: ");
@@ -44,14 +44,14 @@ int	main(int argc, char *argv[])
     xsub1[1] = (ushort)(randtime.tv_usec >> 16);
     xsub1[2] = (ushort)(getpid());
 
-	donut_num = 0;
-	printf("\nstarting consumer %d on node %d\n", my_id, node_id);
+    donut_num = 0;
+    printf("\nstarting consumer %d on node %d\n", my_id, node_id);
 
 // get 10 dozen donuts for testing
 
-	for (i = 0; i < 10; i++) {
-	    for (k = 0; k < 12; ++k) {
-	        j = nrand48(xsub1) & 3;
+    for (i = 0; i < 10; i++) {
+        for (k = 0; k < 12; ++k) {
+            j = nrand48(xsub1) & 3;
 
             if ((inet_sock = socket(AF_INET, SOCK_STREAM, 0)) == -1) {
                 perror("inet_sock allocation failed: ");
@@ -96,10 +96,10 @@ int	main(int argc, char *argv[])
 
             if (type_val != C_ACK)
                 printf("\nBAD REPLY FROM BUFFER MANAGER\n");
-	        close(inet_sock);
+            close(inet_sock);
         } // each dozen
 
 // sleep to force context switch between dozens
-	    usleep(100);
-	}
+        usleep(100);
+    }
 }

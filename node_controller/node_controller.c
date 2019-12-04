@@ -9,7 +9,7 @@
 #include <unistd.h>
 #include <pthread.h>
 
-#define  MAXNODE	16
+#define  MAXNODE    16
 
 char    *host_list[] = { "host list",
                          "cs91515-1", "cs91515-2", "cs91515-3",
@@ -28,25 +28,25 @@ void *msg_maker(void *);
 
 int main(int argc, char *argv[])
 {
-    MSG     		    msg;
-    MBUF			    raw;
-    DONUT			    donut;
-    int    	 		    inet_sock, new_sock, out_index, my_role, node_cnt;
-    int			        my_chan, type_val, id_val, read_val, trigger;
-    int     		    i, j, k, nsigs, donut_num, node_id;
-    int			        wild_card = INADDR_ANY;
-    int			        connect_cnt = 0, th_index = 0;
+    MSG                 msg;
+    MBUF                raw;
+    DONUT               donut;
+    int                 inet_sock, new_sock, out_index, my_role, node_cnt;
+    int                 my_chan, type_val, id_val, read_val, trigger;
+    int                 i, j, k, nsigs, donut_num, node_id;
+    int                 wild_card = INADDR_ANY;
+    int                 connect_cnt = 0, th_index = 0;
     socklen_t           fromlen;
-    char    		    *buffer_ptr;
-    struct sockaddr_in 	inet_telnum;
-    struct hostent 		*heptr, *gethostbyname();
-    struct sigaction 	sigstrc;
-    sigset_t		    mask;
+    char                *buffer_ptr;
+    struct sockaddr_in  inet_telnum;
+    struct hostent      *heptr, *gethostbyname();
+    struct sigaction     sigstrc;
+    sigset_t            mask;
     struct donut_ring   *shared_ring;
     struct timeval      randtime;
     unsigned short      xsub1[3];
-    TH_ARG 			    *th_arg;
-    pthread_t		    thread_ids[MAXNODE];
+    TH_ARG              *th_arg;
+    pthread_t            thread_ids[MAXNODE];
     
     my_role  = atoi(argv[1]);
     node_cnt = atoi(argv[2]);
@@ -54,7 +54,7 @@ int main(int argc, char *argv[])
 // Unless I'm node n of n nodes, I need to do at least 1 accept
     if (node_cnt - my_role > 0) {
 
-        if ((inet_sock=socket(AF_INET, SOCK_STREAM, 0)) == -1) {
+        if ((inet_sock = socket(AF_INET, SOCK_STREAM, 0)) == -1) {
             perror("inet_sock allocation failed: ");
             exit(2);
         }
@@ -65,7 +65,7 @@ int main(int argc, char *argv[])
 
         bcopy(&wild_card, &inet_telnum.sin_addr, sizeof(int));
         inet_telnum.sin_family = AF_INET;
-        inet_telnum.sin_port = htons((u_short)PORT);
+        inet_telnum.sin_port   = htons((u_short)PORT);
 
         if (bind(inet_sock, (struct sockaddr *)&inet_telnum, sizeof(struct sockaddr_in)) == -1) {
             perror("inet_sock bind failed: ");
@@ -87,8 +87,7 @@ int main(int argc, char *argv[])
 
         for (i = 0; i < (node_cnt - my_role); ++i) {
 
-// Accept connection and spawn listener thread
-
+        // Accept connection and spawn listener thread
             while ((connected_ch[i] = accept(inet_sock, (struct sockaddr *)&inet_telnum, 
                                             &fromlen)) == -1 && errno == EINTR);
             if (connected_ch[i] == -1) {
@@ -158,8 +157,7 @@ int main(int argc, char *argv[])
             inet_telnum.sin_family = AF_INET;
             inet_telnum.sin_port = htons((u_short)PORT);
 
-            if (connect(connected_ch[connect_cnt], (struct sockaddr *)&inet_telnum,
-                        sizeof(struct sockaddr_in)) == -1) {
+            if (connect(connected_ch[connect_cnt], (struct sockaddr *)&inet_telnum, sizeof(struct sockaddr_in)) == -1) {
                 perror("inet_sock connect failed: ");
                 exit(2);
             }
@@ -202,7 +200,6 @@ int main(int argc, char *argv[])
             }
             break; // accepts and 2 connects
         case 4:
-
             // need 3 connects, access hostname array for connect targets
             if ((heptr = gethostbyname( host_list[1] )) == NULL) {
                 perror("gethostbyname failed: ");
@@ -225,7 +222,7 @@ int main(int argc, char *argv[])
             th_arg = malloc(sizeof(TH_ARG));
             th_arg->my_chan = connected_ch[connect_cnt];
             th_arg->my_node_id = my_role;
-//	   printf("\nconnected from %s to %s\n", host_list[my_role], host_list[1]);
+//    printf("\nconnected from %s to %s\n", host_list[my_role], host_list[1]);
 
             if ((errno = pthread_create(&thread_ids[th_index++], NULL,
                           chan_monitor, (void *)th_arg)) != 0) {
@@ -255,7 +252,7 @@ int main(int argc, char *argv[])
             th_arg = malloc(sizeof(TH_ARG));
             th_arg->my_chan = connected_ch[connect_cnt];
             th_arg->my_node_id = my_role;
-//	   printf("\nconnected from %s to %s\n", host_list[my_role], host_list[2]);
+//    printf("\nconnected from %s to %s\n", host_list[my_role], host_list[2]);
 
             if ((errno = pthread_create(&thread_ids[th_index++], NULL,
                           chan_monitor, (void *)th_arg)) != 0) {
@@ -284,7 +281,7 @@ int main(int argc, char *argv[])
             th_arg = malloc(sizeof(TH_ARG));
             th_arg->my_chan = connected_ch[connect_cnt];
             th_arg->my_node_id = my_role;
-//	   printf("\nconnected from %s to %s\n", host_list[my_role], host_list[3]);
+//    printf("\nconnected from %s to %s\n", host_list[my_role], host_list[3]);
 
             if ((errno = pthread_create(&thread_ids[th_index++], NULL, chan_monitor, (void *)th_arg)) != 0) {
                 perror("pthread_create channel monitor failed ");
@@ -309,7 +306,7 @@ int main(int argc, char *argv[])
 }
 
 
-void*	chan_monitor(void *my_arg) {
+void* chan_monitor(void *my_arg) {
 
     int  my_chan, type_val, timestamp, node_id, my_node_id;
     MSG  msg;
@@ -318,16 +315,16 @@ void*	chan_monitor(void *my_arg) {
     my_chan    = ((TH_ARG *)my_arg)->my_chan;
     my_node_id = ((TH_ARG *)my_arg)->my_node_id;
 
-//	printf("\nmy_chan is %d, my node_id is %d\n", my_chan, my_node_id);
+// printf("\nmy_chan is %d, my node_id is %d\n", my_chan, my_node_id);
 
 
-//	if (my_node_id == 3) {
+// if (my_node_id == 3) {
         make_msg(&msg, CONNECTED, my_node_id, 0, 0);
         if (write(my_chan, &msg, (4*sizeof(int))) == -1) {
             perror("connected channel write failed: ");
             exit(3);
         }
-//	}
+// }
 
     while(1) {
         read_msg(my_chan, &raw.buf);
@@ -348,11 +345,10 @@ void*	chan_monitor(void *my_arg) {
                     perror("connected channel write failed: ");
                     exit(3);
                 }
-
                 break;
             case CONN_ACK:
                 printf("\nreceived CONN_ACK from node %s\n", host_list[node_id]);
-                break;	
+                break; 
             default:
                 printf("\nchannel monitor received unknown message type: %d \n", type_val);
         }
@@ -361,7 +357,7 @@ void*	chan_monitor(void *my_arg) {
 
 void*  msg_maker(void * argx) {
     int  my_chan, type_val, timestamp, node_id, my_node_id;
-    int	 in_msg, ch_index;
+    int  in_msg, ch_index;
     MSG  msg;
     MBUF raw;
 
