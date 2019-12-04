@@ -6,7 +6,7 @@
 #include <sys/signal.h>
 #include <sys/time.h>
 #include <stdlib.h>
-		// use 9 digit value
+        // use 9 digit value
 #define    SEMKEY     (key_t)5763
 #define    MEMKEY     (key_t)5763 
 #define    NUMFLAVORS 4
@@ -16,16 +16,16 @@
 #define    CONSUMER	  1
 
 typedef struct a_donut{
-	int   node_id;
-	int   prod_id;
-	int   donut_num;
+    int   node_id;
+    int   prod_id;
+    int   donut_num;
 } DONUT;
 
 struct	donut_ring{
-	DONUT flavor[NUMFLAVORS][NUMSLOTS];
-	int	  outptr[NUMFLAVORS];
-	int	  in_ptr[NUMFLAVORS];
-	int	  serial[NUMFLAVORS];
+    DONUT flavor[NUMFLAVORS][NUMSLOTS];
+    int	  outptr[NUMFLAVORS];
+    int	  in_ptr[NUMFLAVORS];
+    int	  serial[NUMFLAVORS];
 };
 
 int	p(int, int);

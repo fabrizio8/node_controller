@@ -47,15 +47,15 @@
 
 
 typedef  struct{
-	int  mtype;      // what operation ?
-	int  mid;        // what producer-ID
-	int  mdonut_num; // what donut number for this producer
-	int  mnode_id;   // what node-ID producer lives on
+    int  mtype;      // what operation ?
+    int  mid;        // what producer-ID
+    int  mdonut_num; // what donut number for this producer
+    int  mnode_id;   // what node-ID producer lives on
 } MSG;
 
 typedef union{
-	MSG m;                  // structured message
-	char buf[sizeof(MSG)];  // message as a raw byte buffer
+    MSG m;                  // structured message
+    char buf[sizeof(MSG)];  // message as a raw byte buffer
 } MBUF;
 
 extern int errno;

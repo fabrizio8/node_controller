@@ -7,7 +7,7 @@
 int	main(int argc, char *argv[])
 {
 
-	int		  i,j,k,nsigs;
+  int		  i,j,k,nsigs;
   MSG     msg;
   MBUF    raw;
   int     inet_sock, local_file, donut_num, node_id;
@@ -18,14 +18,14 @@ int	main(int argc, char *argv[])
   struct  sockaddr_in inet_telnum;
   struct  hostent *heptr, *gethostbyname();
   struct  timeval randtime;
-	unsigned short 	xsub1[3];
+  unsigned short 	xsub1[3];
 
-	if (argc < 4){
-	  printf("\nUSAGE: net_producer BM_host_name prod_id node_id\n");
-	  exit(2);
-	}
+  if (argc < 4){
+    printf("\nUSAGE: net_producer BM_host_name prod_id node_id\n");
+    exit(2);
+  }
 
-	my_id   = atoi(argv[2]);
+  my_id   = atoi(argv[2]);
   node_id = atoi(argv[3]);
 
   if ((heptr = gethostbyname(argv[1])) == NULL) {
@@ -43,23 +43,23 @@ int	main(int argc, char *argv[])
   xsub1[1] = (ushort)(randtime.tv_usec >> 16);
   xsub1[2] = (ushort)(getpid());
 
-	donut_num = 1;
-	printf("\n starting producer %d on node %d\n", my_id, node_id);
+  donut_num = 1;
+  printf("\n starting producer %d on node %d\n", my_id, node_id);
 
-	while(1) {
-	  j = nrand48(xsub1) & 3;
+  while(1) {
+    j = nrand48(xsub1) & 3;
 
     if((inet_sock=socket(AF_INET, SOCK_STREAM, 0)) == -1) {
       perror("inet_sock allocation failed: ");
       exit(1);
     }
 
-	  if(connect(inet_sock, (struct sockaddr *)&inet_telnum, sizeof(struct sockaddr_in)) == -1) {
+    if(connect(inet_sock, (struct sockaddr *)&inet_telnum, sizeof(struct sockaddr_in)) == -1) {
       perror("inet_sock connect failed: ");
       exit(2);
     }
 
-	  make_msg(&msg, j, my_id, donut_num++, node_id);
+    make_msg(&msg, j, my_id, donut_num++, node_id);
 
     if(write(inet_sock, &msg, (4*sizeof(int))) == -1) { 
       perror("inet_sock write failed: ");
@@ -69,11 +69,11 @@ int	main(int argc, char *argv[])
     read_msg(inet_sock, &raw.buf);
     type_val = ntohl(raw.m.mtype);
 
-	  if (type_val != P_ACK)
+    if (type_val != P_ACK)
       printf("\nBAD REPLY FROM BUFFER MANAGER\n");
-	  close(inet_sock);
+    close(inet_sock);
 
 // sleep between each donut made
-	  usleep(10000);
-	} // while 1
+    usleep(10000);
+  } // while 1
 }

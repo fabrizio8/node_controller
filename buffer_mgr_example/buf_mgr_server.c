@@ -9,17 +9,17 @@ void    sig_handler(int);  // clean up shm and sem resources
 int main(int argc, char *argv[])
 {
     MSG     		    msg;
-	MBUF			    raw;
-	DONUT			    donut;
+    MBUF			    raw;
+    DONUT			    donut;
     int    	 	        inet_sock, new_sock, out_index;
-	int			        type_val, id_val, read_val, trigger;
+    int			        type_val, id_val, read_val, trigger;
     int     		    i, j, k, nsigs, donut_num, node_id;
     socklen_t           fromlen;
     int			        wild_card = INADDR_ANY;
-	char    		    *buffer_ptr;
+    char    		    *buffer_ptr;
     struct sockaddr_in 	inet_telnum;
-	struct hostent 		*heptr, *gethostbyname();
-	struct sigaction 	sigstrc;
+    struct hostent 		*heptr, *gethostbyname();
+    struct sigaction 	sigstrc;
     sigset_t		    mask;
     struct donut_ring   *shared_ring;
     struct timeval      randtime;
@@ -76,13 +76,13 @@ int main(int argc, char *argv[])
 
 /***** set up sigaction structure to eliminate zombies *****/
 
-	sigemptyset(&mask);
+    sigemptyset(&mask);
 
-	sigstrc.sa_handler = SIG_IGN; // ignore this signal to prevent zombie
-	sigstrc.sa_mask    = mask;
-	sigstrc.sa_flags   = SA_RESTART;
+    sigstrc.sa_handler = SIG_IGN; // ignore this signal to prevent zombie
+    sigstrc.sa_mask    = mask;
+    sigstrc.sa_flags   = SA_RESTART;
 
-	sigaction(SIGCHLD, &sigstrc, NULL);
+    sigaction(SIGCHLD, &sigstrc, NULL);
 
 /***** allocate a socket to communicate with *****/
 
@@ -95,11 +95,11 @@ int main(int argc, char *argv[])
 /***** IP address structure, along with port and family and *****/
 /***** use the structure to give yourself a connect address *****/
 
-	bcopy(&wild_card, &inet_telnum.sin_addr, sizeof(int));
-	inet_telnum.sin_family = AF_INET;
-	inet_telnum.sin_port   = htons((u_short)PORT);
+    bcopy(&wild_card, &inet_telnum.sin_addr, sizeof(int));
+    inet_telnum.sin_family = AF_INET;
+    inet_telnum.sin_port   = htons((u_short)PORT);
 
-	if (bind(inet_sock, (struct sockaddr *)&inet_telnum, sizeof(struct sockaddr_in)) == -1)  {
+    if (bind(inet_sock, (struct sockaddr *)&inet_telnum, sizeof(struct sockaddr_in)) == -1)  {
         perror("inet_sock bind failed: ");
         sig_handler(-1);
     }
@@ -108,20 +108,20 @@ int main(int argc, char *argv[])
 
     listen(inet_sock, 5);
 
-	for (i = 0; i < NUMFLAVORS; ++i) {
+    for (i = 0; i < NUMFLAVORS; ++i) {
         for (j = 0; j < NUMSLOTS; ++j) {
             shared_ring->flavor[i][j].node_id   = -1;
             shared_ring->flavor[i][j].prod_id   = -1;
             shared_ring->flavor[i][j].donut_num = -1;
         }
-	}
-		
-	printf("\nTHE BUFFER MANAGER IS UP\n");
+    }
+        
+    printf("\nTHE BUFFER MANAGER IS UP\n");
 
 /***** forever more, answer the phone and create a child to *****/
 /***** handle each client connection (use EINTR check)      *****/
 
-	trigger = 0;
+    trigger = 0;
     for (;;) {  /* forever */
         if (trigger++ == 650) {
             write(1, "\n\n*********\n\n", 13);
@@ -135,7 +135,7 @@ int main(int argc, char *argv[])
                 perror("exec ps failed");
                 exit(4);
             }
-	    }
+        }
 /***** set sizeof(struct sockaddr) into fromlen to specify  *****/
 /***** original buffer size for returned address (the       *****/
 /***** actual size of the returned address then goes here)  *****/
@@ -148,7 +148,7 @@ int main(int argc, char *argv[])
             perror("accept failed: ");
             sig_handler(-1);
         }
-	 
+     
         switch (fork()) {
             default: /***** parent takes this case if fork succeeds               *****/
                 close(new_sock);

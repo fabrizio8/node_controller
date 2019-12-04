@@ -15,7 +15,7 @@ int p(int semidgroup, int donut_type) {
     if(semop(semidgroup, &semopbuf,1) == -1)
         return (-1);
 
-	return(0);
+    return(0);
 }
 
 int v(int semidgroup, int donut_type) {
@@ -28,7 +28,7 @@ int v(int semidgroup, int donut_type) {
     if (semop(semidgroup, &semopbuf,1) == -1) {
         return(-1);
     }
-	return(0);
+    return(0);
 }
 
 int semsetall(int semgroup, int number_in_group, int set_all_value) {
@@ -48,6 +48,6 @@ int semsetall(int semgroup, int number_in_group, int set_all_value) {
             return(-1);
         }
     }
-	return(0);
+    return(0);
 }
 

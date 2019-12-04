@@ -23,10 +23,10 @@ typedef struct a_donut{
 } DONUT;
 
 struct	donut_ring{
-	DONUT	flavor[NUMFLAVORS][NUMSLOTS];
-	int	outptr[NUMFLAVORS];
-	int	in_ptr[NUMFLAVORS];
-	int	serial[NUMFLAVORS];
+    DONUT	flavor[NUMFLAVORS][NUMSLOTS];
+    int	outptr[NUMFLAVORS];
+    int	in_ptr[NUMFLAVORS];
+    int	serial[NUMFLAVORS];
 };
 
 
