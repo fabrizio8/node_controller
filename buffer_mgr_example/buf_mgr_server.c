@@ -182,7 +182,7 @@ int main(int argc, char *argv[])
                         usleep(100);
                         shared_ring->in_ptr[JELLY] = (shared_ring->in_ptr[JELLY]+1) % NUMSLOTS;
 
-                        if ( v(semid[CONSUMER], JELLY) == -1) {
+                        if (v(semid[CONSUMER], JELLY) == -1) {
                             perror("v operation failed: ");
                             exit(9);
                         }
@@ -388,15 +388,15 @@ int main(int argc, char *argv[])
 
 void    sig_handler(int sig)
 {
-    int i,j,k;
+    int i, j, k;
 
-    printf("In signal handler with signal # %d\n",sig);
+    printf("In signal handler with signal # %d\n", sig);
 
     if (shmctl(shmid, IPC_RMID,0) == -1) {
         perror("handler failed shm RMID: ");
     }
 
-    for (i=0; i<NUMSEMIDS; i++) {
+    for (i = 0; i < NUMSEMIDS; i++) {
         if (semctl(semid[i], 0, IPC_RMID,0) == -1) {
             perror("handler failed sem RMID: ");
         }

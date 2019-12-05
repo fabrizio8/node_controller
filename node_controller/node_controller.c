@@ -48,6 +48,11 @@ int main(int argc, char *argv[])
     TH_ARG              *th_arg;
     pthread_t           thread_ids[MAXNODE];
     
+    if (argc < 2) {
+        printf("\nUSAGE: role node_count\n");
+        exit(2);
+    }
+    
     my_role  = atoi(argv[1]);
     node_cnt = atoi(argv[2]);
 
@@ -131,7 +136,7 @@ int main(int argc, char *argv[])
                 perror("inet_sock connect failed: ");
                 exit(2);
             }
-            
+
             th_arg = malloc(sizeof(TH_ARG));
             th_arg->my_chan    = connected_ch[connect_cnt];
             th_arg->my_node_id = my_chan = my_role;
