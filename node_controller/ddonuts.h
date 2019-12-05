@@ -8,10 +8,10 @@
 #include <sys/time.h>
 #include <stdlib.h>
 
-#define		SEMKEY	(key_t)5763 // use 9 digit value
-#define		MEMKEY	(key_t)5763 // use 9 digit value
+#define		SEMKEY	     (key_t)5763 // use 9 digit value
+#define		MEMKEY	     (key_t)5763 // use 9 digit value
 #define		NUMFLAVORS	 4
-#define		NUMSLOTS         900
+#define		NUMSLOTS     900
 #define		NUMSEMIDS	 2
 #define		PROD		 0
 #define		CONSUMER	 1
@@ -23,12 +23,11 @@ typedef struct a_donut{
 } DONUT;
 
 struct	donut_ring{
-    DONUT	flavor[NUMFLAVORS][NUMSLOTS];
-    int	outptr[NUMFLAVORS];
-    int	in_ptr[NUMFLAVORS];
-    int	serial[NUMFLAVORS];
+    DONUT flavor[NUMFLAVORS][NUMSLOTS];
+    int	  outptr[NUMFLAVORS];
+    int	  in_ptr[NUMFLAVORS];
+    int	  serial[NUMFLAVORS];
 };
-
 
 int	p(int, int);
 int	v(int, int);

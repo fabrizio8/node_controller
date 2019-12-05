@@ -34,6 +34,7 @@ int v(int semidgroup, int donut_type) {
 int semsetall(int semgroup, int number_in_group, int set_all_value) {
 
     int i,j,k;
+    
     union semun {
         int val;                    /* value for SETVAL */
         struct semid_ds *buf;       /* buffer for IPC_STAT, IPC_SET */

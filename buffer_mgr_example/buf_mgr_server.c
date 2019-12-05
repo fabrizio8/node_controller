@@ -48,12 +48,12 @@ int main(int argc, char *argv[])
         }
     }
 
-    if ((shmid=shmget(SEMKEY, sizeof(struct donut_ring), IPC_CREAT | 0600)) == -1) {
+    if ((shmid = shmget(SEMKEY, sizeof(struct donut_ring), IPC_CREAT | 0600)) == -1) {
         perror("shared get failed: ");
         exit(1);
     }
 
-    if ((shared_ring=(struct donut_ring *)shmat(shmid, NULL, 0)) == (void *)-1) {
+    if ((shared_ring = (struct donut_ring *)shmat(shmid, NULL, 0)) == (void *)-1) {
         perror("shared attach failed: ");
         sig_handler(-1);
     }
@@ -86,7 +86,7 @@ int main(int argc, char *argv[])
 
 /***** allocate a socket to communicate with *****/
 
-    if ((inet_sock=socket(AF_INET, SOCK_STREAM, 0)) == -1) {
+    if ((inet_sock = socket(AF_INET, SOCK_STREAM, 0)) == -1) {
         perror("inet_sock allocation failed: ");
         sig_handler(-1);
     }
@@ -183,8 +183,8 @@ int main(int argc, char *argv[])
                         shared_ring->in_ptr[JELLY] = (shared_ring->in_ptr[JELLY]+1) % NUMSLOTS;
 
                         if ( v(semid[CONSUMER], JELLY) == -1) {
-                                perror("v operation failed: ");
-                                exit(9);
+                            perror("v operation failed: ");
+                            exit(9);
                         }
 
                         make_msg(&msg, P_ACK, BUF_MGR, donut_num, 0);
@@ -220,10 +220,10 @@ int main(int argc, char *argv[])
                         exit(10);
 
                     case PRO_COCO:
-                        if ( p(semid[PROD], COCO) == -1) {
+                        if (p(semid[PROD], COCO) == -1) {
                             perror("p operation failed: ");
                             exit(9);
-                    }
+                        }
                         shared_ring->flavor[COCO][shared_ring->in_ptr[COCO]].node_id   = node_id;
                         shared_ring->flavor[COCO][shared_ring->in_ptr[COCO]].prod_id   = id_val;
                         shared_ring->flavor[COCO][shared_ring->in_ptr[COCO]].donut_num = donut_num;
@@ -244,7 +244,7 @@ int main(int argc, char *argv[])
                         exit(10);
 
                     case PRO_CREAM:
-                        if ( p(semid[PROD], CREAM) == -1) {
+                        if (p(semid[PROD], CREAM) == -1) {
                             perror("p operation failed: ");
                             exit(9);
                         }
@@ -255,7 +255,7 @@ int main(int argc, char *argv[])
                         usleep(100);
                         shared_ring->in_ptr[CREAM] = (shared_ring->in_ptr[CREAM]+1) % NUMSLOTS;
 
-                        if ( v(semid[CONSUMER], CREAM) == -1) {
+                        if (v(semid[CONSUMER], CREAM) == -1) {
                             perror("v operation failed: ");
                             exit(9);
                         }
@@ -268,7 +268,7 @@ int main(int argc, char *argv[])
                         exit(10);
 
                     case CON_JELLY:
-                        if ( p(semid[CONSUMER], JELLY) == -1) {
+                        if (p(semid[CONSUMER], JELLY) == -1) {
                             perror("p operation failed: ");
                             exit(9);
                         }
@@ -322,7 +322,7 @@ int main(int argc, char *argv[])
 
 
                     case CON_COCO:
-                        if ( p(semid[CONSUMER], COCO) == -1) {
+                        if (p(semid[CONSUMER], COCO) == -1) {
                             perror("p operation failed: ");
                             exit(9);
                         }
@@ -334,7 +334,7 @@ int main(int argc, char *argv[])
                         usleep(100);
                         shared_ring->outptr[COCO] = (shared_ring->outptr[COCO]+1) % NUMSLOTS;
 
-                        if ( v(semid[PROD], COCO) == -1) {
+                        if (v(semid[PROD], COCO) == -1) {
                             perror("v operation failed: ");
                             exit(9);
                         }
@@ -360,7 +360,7 @@ int main(int argc, char *argv[])
                         usleep(100);
                         shared_ring->outptr[CREAM] = (shared_ring->outptr[CREAM]+1) % NUMSLOTS;
 
-                        if ( v(semid[PROD], CREAM) == -1) {
+                        if (v(semid[PROD], CREAM) == -1) {
                             perror("v operation failed: ");
                             exit(9);
                         }

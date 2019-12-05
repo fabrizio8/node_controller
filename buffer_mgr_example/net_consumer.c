@@ -7,18 +7,18 @@
 int main(int argc, char *argv[])
 {
 
-    int  i,j,k,nsigs;
-    int     inet_sock, local_file, donut_num, node_id;
-    int     type_val, id_val, read_val, local_size, my_id;
-    char    *buffer_ptr, *token_ptr, *last_token_ptr;
-    char    full_file_path_name[256];
-    MSG     msg;
-    MBUF    raw;
-    union   type_size;
-    int     pro_id_val, pro_node_id;
-    struct  sockaddr_in inet_telnum;
-    struct  hostent *heptr, *gethostbyname();
-    struct  timeval randtime;
+    int      i, j, k, nsigs;
+    int      inet_sock, local_file, donut_num, node_id;
+    int      type_val, id_val, read_val, local_size, my_id;
+    int      pro_id_val, pro_node_id;
+    char     *buffer_ptr, *token_ptr, *last_token_ptr;
+    char     full_file_path_name[256];
+    MSG      msg;
+    MBUF     raw;
+    union    type_size;
+    struct   sockaddr_in inet_telnum;
+    struct   hostent *heptr, *gethostbyname();
+    struct   timeval randtime;
     unsigned short  xsub1[3];
 
     if (argc < 4) {

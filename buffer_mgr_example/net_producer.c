@@ -3,7 +3,6 @@
 #include "ddonuts.h"
 #include "buf_mgr.h"
 
-
 int main(int argc, char *argv[])
 {
 
@@ -35,7 +34,7 @@ int main(int argc, char *argv[])
 
   bcopy(heptr->h_addr, &inet_telnum.sin_addr, heptr->h_length);
   inet_telnum.sin_family = AF_INET;
-  inet_telnum.sin_port = htons( (u_short)PORT );
+  inet_telnum.sin_port   = htons((u_short)PORT);
 
   gettimeofday(&randtime, NULL);
 
@@ -46,22 +45,22 @@ int main(int argc, char *argv[])
   donut_num = 1;
   printf("\n starting producer %d on node %d\n", my_id, node_id);
 
-  while(1) {
+  for (;;) {
     j = nrand48(xsub1) & 3;
 
-    if((inet_sock=socket(AF_INET, SOCK_STREAM, 0)) == -1) {
+    if ((inet_sock = socket(AF_INET, SOCK_STREAM, 0)) == -1) {
       perror("inet_sock allocation failed: ");
       exit(1);
     }
 
-    if(connect(inet_sock, (struct sockaddr *)&inet_telnum, sizeof(struct sockaddr_in)) == -1) {
+    if (connect(inet_sock, (struct sockaddr *)&inet_telnum, sizeof(struct sockaddr_in)) == -1) {
       perror("inet_sock connect failed: ");
       exit(2);
     }
 
     make_msg(&msg, j, my_id, donut_num++, node_id);
 
-    if(write(inet_sock, &msg, (4*sizeof(int))) == -1) { 
+    if (write(inet_sock, &msg, (4*sizeof(int))) == -1) { 
       perror("inet_sock write failed: ");
       exit(3);
     }
@@ -76,5 +75,5 @@ int main(int argc, char *argv[])
 
 // sleep between each donut made
     usleep(10000);
-  } // while 1
+  }
 }
