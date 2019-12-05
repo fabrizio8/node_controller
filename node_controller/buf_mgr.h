@@ -16,7 +16,7 @@
 #include <errno.h>
 
 
-#define PORT  	  37439 // use a value from 1001 - (64K-1)
+#define PORT  	  9999 // use a value from 1001 - (64K-1)
 
 #define JELLY     0
 #define PLAIN     1
