@@ -6,11 +6,11 @@
 int main(int argc, char *argv[])
 {
 
-  int     i,j,k,nsigs;
-  MSG     msg;
-  MBUF    raw;
+  int     i, j, k, nsigs;
   int     inet_sock, local_file, donut_num, node_id;
   int     type_val, id_val, read_val, local_size, my_id;
+  MSG     msg;
+  MBUF    raw;
   char    *buffer_ptr, *token_ptr, *last_token_ptr;
   char    full_file_path_name[256];
   union   type_size;
@@ -52,7 +52,7 @@ int main(int argc, char *argv[])
       perror("inet_sock allocation failed: ");
       exit(1);
     }
-
+    // communicate with node controller
     if (connect(inet_sock, (struct sockaddr *)&inet_telnum, sizeof(struct sockaddr_in)) == -1) {
       perror("inet_sock connect failed: ");
       exit(2);

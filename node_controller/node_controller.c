@@ -2,12 +2,10 @@
 /*    USAGE:  node controller my_role<1-n> node_cnt<n>             */
 /*            where role n does all connect and role 1 all accepts */
 
-
-#include "buf_mgr.h"
-#include "ddonuts.h"
-
 #include <unistd.h>
 #include <pthread.h>
+#include "buf_mgr.h"
+#include "ddonuts.h"
 
 #define  MAXNODE    16
 
@@ -80,10 +78,8 @@ int main(int argc, char *argv[])
 /***** allow client connect requests to arrive: call-wait 5 *****/
         listen(inet_sock, 5);
 
-/***** set sizeof(struct sockaddr) into fromlen to specify  *****/
-/***** original buffer size for returned address (the       *****/
-/***** actual size of the returned address then goes here)  *****/
-
+/***** set sizeof(struct sockaddr) into fromlen to specify original buffer size for*****/
+/***** returned address (the actual size of the returned address then goes here)  *****/
         fromlen = sizeof(struct sockaddr);
 
 // Accept a connection based on role ... if role is 3 and node_cnt is 5
@@ -128,7 +124,7 @@ int main(int argc, char *argv[])
 
             bcopy(heptr->h_addr, &inet_telnum.sin_addr, heptr->h_length);
             inet_telnum.sin_family = AF_INET;
-            inet_telnum.sin_port   = htons( (u_short)PORT );
+            inet_telnum.sin_port   = htons((u_short)PORT);
 
     // connect to target and spawn listener thread
 
@@ -169,7 +165,7 @@ int main(int argc, char *argv[])
             th_arg = malloc(sizeof(TH_ARG));
             th_arg->my_chan    = connected_ch[connect_cnt];
             th_arg->my_node_id = my_role;
-             printf("\nconnected from %s to %s\n", host_list[my_role], host_list[1]);
+            printf("\nconnected from %s to %s\n", host_list[my_role], host_list[1]);
 
             if ((errno = pthread_create(&thread_ids[th_index++], NULL, chan_monitor, (void *)th_arg)) != 0) {
                  perror("pthread_create channel monitor failed ");
@@ -204,6 +200,7 @@ int main(int argc, char *argv[])
                  exit(3);
             }
             break; // accepts and 2 connects
+            
         case 4:
             // need 3 connects, access hostname array for connect targets
             if ((heptr = gethostbyname( host_list[1] )) == NULL) {
@@ -227,7 +224,7 @@ int main(int argc, char *argv[])
             th_arg = malloc(sizeof(TH_ARG));
             th_arg->my_chan    = connected_ch[connect_cnt];
             th_arg->my_node_id = my_role;
-//    printf("\nconnected from %s to %s\n", host_list[my_role], host_list[1]);
+            //    printf("\nconnected from %s to %s\n", host_list[my_role], host_list[1]);
 
             if ((errno = pthread_create(&thread_ids[th_index++], NULL, chan_monitor, (void *)th_arg)) != 0) {
                 perror("pthread_create channel monitor failed ");
@@ -248,8 +245,7 @@ int main(int argc, char *argv[])
             inet_telnum.sin_family = AF_INET;
             inet_telnum.sin_port   = htons( (u_short)PORT );
 
-            if (connect(connected_ch[connect_cnt], (struct sockaddr *)&inet_telnum,
-                               sizeof(struct sockaddr_in)) == -1) {
+            if (connect(connected_ch[connect_cnt], (struct sockaddr *)&inet_telnum, sizeof(struct sockaddr_in)) == -1) {
                 perror("inet_sock connect failed: ");
                 exit(2);
             }
@@ -305,10 +301,8 @@ int main(int argc, char *argv[])
     }
 // Assuming 5 node example, main thread can exit here,
 // full connection is constructed
-
     printf("\nnode controller finished, goodbye\n");
 }
-
 
 void* chan_monitor(void *my_arg) {
 
@@ -320,7 +314,6 @@ void* chan_monitor(void *my_arg) {
     my_node_id = ((TH_ARG *)my_arg)->my_node_id;
 
 // printf("\nmy_chan is %d, my node_id is %d\n", my_chan, my_node_id);
-
 
 // if (my_node_id == 3) {
         make_msg(&msg, CONNECTED, my_node_id, 0, 0);
@@ -340,7 +333,6 @@ void* chan_monitor(void *my_arg) {
 ***********************************************/
 
 /***** what type of message has the client sent to us ??     *****/
-
         switch(type_val) {
             case CONNECTED:
                 printf("\nchannel monitor is connected to node %d\n", node_id);

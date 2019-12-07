@@ -47,7 +47,7 @@
 
 
 typedef  struct{
-    int  mtype;      // what operation ?
+    /**/ long int  mtype;      // what operation ?
     int  mid;        // what producer-ID
     int  mdonut_num; // what donut number for this producer
     int  mnode_id;   // what node-ID producer lives on

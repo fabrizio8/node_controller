@@ -75,7 +75,6 @@ int main(int argc, char *argv[])
     }
 
 /***** set up sigaction structure to eliminate zombies *****/
-
     sigemptyset(&mask);
 
     sigstrc.sa_handler = SIG_IGN; // ignore this signal to prevent zombie
@@ -85,7 +84,6 @@ int main(int argc, char *argv[])
     sigaction(SIGCHLD, &sigstrc, NULL);
 
 /***** allocate a socket to communicate with *****/
-
     if ((inet_sock = socket(AF_INET, SOCK_STREAM, 0)) == -1) {
         perror("inet_sock allocation failed: ");
         sig_handler(-1);
@@ -105,7 +103,6 @@ int main(int argc, char *argv[])
     }
 
 /***** allow client connect requests to arrive: call-wait 5 *****/
-
     listen(inet_sock, 5);
 
     for (i = 0; i < NUMFLAVORS; ++i) {
