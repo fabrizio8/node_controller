@@ -1,13 +1,9 @@
 #include "messaging.h"
 
-#define MAX_MSGS 1000
-
 static int lock() {
-
     int x = 0;
     pthread_t callingthreadid = pthread_self();
     x = pthread_mutex_lock(&messagelock);
-
 #ifdef QUEUE_DEBUG
     if (x != 0 ) {
         printf("lock(%lld) failed to lock mutex.\n", callingthreadid);
@@ -36,7 +32,6 @@ static int lock() {
 }
 
 static int unlock() {
-
     int x = 0;
     pthread_t callingthreadid = pthread_self();
     x = pthread_mutex_unlock(&messagelock);
@@ -49,34 +44,29 @@ static int unlock() {
 }
 
 static char *getthreadname( pthread_t idnum ) {
-
     static char retval[] = "";
-    JQUEUE *jq = jqueue;
-    if (!jq)
-        return retval;
+    MSG_Q *mq = mqueue;
+    if (!mq) return retval;
     lock();
     do {
-        if (jq->owningthreadid == idnum) {
+        if (mq->owningthreadid == idnum) {
             unlock();
-            return jq->threadname;
+            return mq->threadname;
         }
-        jq = jq->next;
-    } while (jq);
+        mq = mq->next;
+    } while (mq);
 
     unlock();
     return retval;
 }
 
 int createmessagequeue( char *description ) {
-
-    int retval = JMSG_QUEUENOTFOUND;
-    JQUEUE *jq = jqueue;
+    int retval = MSG_QUEUENOTFOUND;
+    MSG_Q *mq = mqueue;
     pthread_t callingthreadid = pthread_self();
 
     pthread_mutexattr_t ptt;
-
-    if (!jq) {
-
+    if (!mq) {
 #ifdef QUEUE_DEBUG
         printf("messaging.c > Initializing Messaging System ********************** \n");
 #endif
@@ -88,96 +78,87 @@ int createmessagequeue( char *description ) {
 #endif
         pthread_mutex_init(&messagelock, &ptt);
         lock();
-        jqueue = calloc(1, sizeof(JQUEUE));
-        if (jqueue) {
-
-            jqueue->jmessagelist = calloc(JMSG_INIT_QUEUE_SIZE, sizeof(JMESSAGE));
-
-            if (jqueue->jmessagelist) {
-
-                jqueue->queuesize = JMSG_INIT_QUEUE_SIZE;
-                jqueue->owningthreadid = callingthreadid;
-                jqueue->lastfulljmessage = JMSG_EMPTY_QUEUE;
-
+        mqueue = calloc(1, sizeof(MSG_Q));
+        if (mqueue) {
+            mqueue->jmessagelist = calloc(MSG_INIT_QUEUE_SIZE, sizeof(MESSAGE));
+            if (mqueue->jmessagelist) {
+                mqueue->queuesize = MSG_INIT_QUEUE_SIZE;
+                mqueue->owningthreadid = callingthreadid;
+                mqueue->lastfulljmessage = MSG_EMPTY_QUEUE;
                 if (description) {
                     if (strlen(description) < 100) {
-                        sprintf(jqueue->threadname, "%s", description);
+                        sprintf(mqueue->threadname, "%s", description);
                     } else {
-                        sprintf(jqueue->threadname, "%.*s", 99, description);
+                        sprintf(mqueue->threadname, "%.*s", 99, description);
                     }
                 }
-
-                sprintf(jqueue->semname, "SEM%d", (int)callingthreadid);
-                jqueue->messagesignal = sem_open(jqueue->semname, O_CREAT, 0644, 0);
-
+                sprintf(mqueue->semname, "SEM%d", (int)callingthreadid);
+                mqueue->messagesignal = sem_open(mqueue->semname, O_CREAT, 0644, 0);
 #ifdef QUEUE_DEBUG
-                printf("messaging.c > Message queue set up for \"%s\" (%lld).\n ", jqueue->threadname, callingthreadid);
+                printf("messaging.c > Message queue set up for \"%s\" (%lld).\n ", mqueue->threadname, callingthreadid);
 #endif
-                retval = JMSG_OKAY;
+                retval = MSG_OKAY;
             } else {
-                free(jqueue);
-                jqueue = 0;
-                retval = JMSG_OUTOFMEMORY;
+                free(mqueue);
+                mqueue = 0;
+                retval = MSG_OUTOFMEMORY;
             }
         } else {
-            retval = JMSG_OUTOFMEMORY;
+            retval = MSG_OUTOFMEMORY;
         }
     } else {
-
         lock();
         do {
-            if (jq->owningthreadid == callingthreadid) {
-                retval = JMSG_OKAY;
+            if (mq->owningthreadid == callingthreadid) {
+                retval = MSG_OKAY;
                 break;
             }
-            if (jq->next == 0) {
-                jq->next = calloc(1, sizeof(JQUEUE));
-                if (jq->next) {
+            if (mq->next == 0) {
+                mq->next = calloc(1, sizeof(MSG_Q));
+                if (mq->next) {
 
-                    jq->next->jmessagelist = calloc(JMSG_INIT_QUEUE_SIZE, sizeof(JMESSAGE));
+                    mq->next->jmessagelist = calloc(MSG_INIT_QUEUE_SIZE, sizeof(MESSAGE));
 
-                    if (jq->next->jmessagelist) {
-                        jq->next->previous = jq;
-                        jq->next->queuesize = JMSG_INIT_QUEUE_SIZE;
-                        jq->next->owningthreadid = callingthreadid;
-                        jq->next->lastfulljmessage = JMSG_EMPTY_QUEUE;
-                        sprintf(jq->next->semname, "SEM%d", (int)callingthreadid);
+                    if (mq->next->jmessagelist) {
+                        mq->next->previous = mq;
+                        mq->next->queuesize = MSG_INIT_QUEUE_SIZE;
+                        mq->next->owningthreadid = callingthreadid;
+                        mq->next->lastfulljmessage = MSG_EMPTY_QUEUE;
+                        sprintf(mq->next->semname, "SEM%d", (int)callingthreadid);
                         if (description) {
                             if (strlen(description) < 100) {
-                                sprintf(jq->next->threadname, "%s", description);
+                                sprintf(mq->next->threadname, "%s", description);
                             } else {
-                                sprintf(jq->next->threadname, "%.*s", 99, description);
+                                sprintf(mq->next->threadname, "%.*s", 99, description);
                             }
                         }
 #ifdef QUEUE_DEBUG
-                        printf("messaging.c > Message queue set up for \"%s\" (%lld).\n ", jq->next->threadname, callingthreadid);
+                        printf("messaging.c > Message queue set up for \"%s\" (%lld).\n ", mq->next->threadname, callingthreadid);
 #endif
-                        jq->next->messagesignal = sem_open(jq->next->semname, O_CREAT, S_IRWXU, 0);
-                        retval = JMSG_OKAY;
+                        mq->next->messagesignal = sem_open(mq->next->semname, O_CREAT, S_IRWXU, 0);
+                        retval = MSG_OKAY;
                     } else {
-                        free(jq);
-                        jq = 0;
-                        retval = JMSG_OUTOFMEMORY;
+                        free(mq);
+                        mq = 0;
+                        retval = MSG_OUTOFMEMORY;
                     }
                 }
                 break;
             } 
-            jq = jq->next;
-        } while (jq);
+            mq = mq->next;
+        } while (mq);
     }
     unlock();
     return retval;
 }
 
-
 int destroymessagequeue() {
-
-    int i = 0, retval = JMSG_QUEUENOTFOUND;
-    JQUEUE *jq   = jqueue;
-    JMESSAGE *jm = 0;
+    int i = 0, retval = MSG_QUEUENOTFOUND;
+    MSG_Q *mq = mqueue;
+    MESSAGE *m = 0;
     pthread_t callingthreadid = pthread_self();
     lock();
-    if (jq) {
+    if (mq) {
         /* 
          * Search for messages waiting to be delivered that are from THIS
          * QUEUE that we're destroying.  We need to replace the pointer that
@@ -187,154 +168,155 @@ int destroymessagequeue() {
          * 
          */
         do {
-            if (jq->owningthreadid != callingthreadid) {
-                for (i = 0; i <= jq->lastfulljmessage; i++) {
-                    jm = &jq->jmessagelist[i];
-                    if (jm->fromthread == callingthreadid) {
-                        jm->fromthreadname = "(dead queue)";
+            if (mq->owningthreadid != callingthreadid) {
+                for (i = 0; i <= mq->lastfulljmessage; i++) {
+                    m = &mq->jmessagelist[i];
+                    if (m->fromthread == callingthreadid) {
+                        m->fromthreadname = "(dead queue)";
                     }
                 }
             }
-            jq = jq->next;
-        } while (jq);
+            mq = mq->next;
+        } while (mq);
 
-        /* Reset jq, find this queue and destroy it */
-        jq = jqueue;
+        /* Reset mq, find this queue and destroy it */
+        mq = mqueue;
         do {
-            if (jq->owningthreadid == callingthreadid) {
+            if (mq->owningthreadid == callingthreadid) {
                 /* Found the queue */
-                retval = JMSG_OKAY;
+                retval = MSG_OKAY;
 #ifdef QUEUE_DEBUG
-                printf("messaging.c > Destroying message queue for \"%s\" (%lld)\n", jq->threadname, jq->owningthreadid);
+                printf("messaging.c > Destroying message queue for \"%s\" (%lld)\n", mq->threadname, mq->owningthreadid);
 #endif
                 /* 
                  Free any internal pointers that were supposed
                  to be freed after retrieval.
                  */
-                for (i = 0; i <= jq->lastfulljmessage; i++) {
-                    sem_wait(jq->messagesignal);
-                    if (jq->jmessagelist[i].needtofreepointer) {
-                        free(jq->jmessagelist[i].ptr.charptr);
+                for (i = 0; i <= mq->lastfulljmessage; i++) {
+                    sem_wait(mq->messagesignal);
+                    if (mq->jmessagelist[i].needtofreepointer) {
+                        free(mq->jmessagelist[i].ptr.charptr);
                     }
 
                 }
                 /* Free the queue messages */
-                free(jq->jmessagelist);
-
-                sem_unlink(jq->semname);
+                free(mq->jmessagelist);
+                sem_unlink(mq->semname);
 
                 /* Unlink the queue */
-                if (jq->previous) { /* If this isn't the first element */
-                    jq->previous->next = jq->next;
-                    if (jq->next) {
-                        jq->next->previous = jq->previous;
+
+                if (mq->previous) { /* If this isn't the first element */
+                    mq->previous->next = mq->next;
+                    if (mq->next) {
+                        mq->next->previous = mq->previous;
                     }
                 } else {
-                    if (jq->next) {
-                        jq->next->previous = 0;
+                    if (mq->next) {
+                        mq->next->previous = 0;
                     }
                 }
-                free(jq);
+                free(mq);
                 break;
             }
-            jq = jq->next;
-        } while (jq);
+            mq = mq->next;
+        } while (mq);
     }
     unlock();
     return retval;
 }
 
-int pushmessage( JMESSAGE *jmsg, pthread_t to_thread_id ) {
-
-    int queuespotsleft = 0, retval = JMSG_QUEUENOTFOUND;
-    JQUEUE *jq   = jqueue;
-    JMESSAGE *jm = 0, *newjmqueue;
+int pushmessage( MESSAGE *msg, pthread_t to_thread_id ) {
+    int remaining_space = 0, retval = MSG_QUEUENOTFOUND;
+    MSG_Q *mq = mqueue;
+    MESSAGE *m = 0, *mqueue_new;
     pthread_t callingthreadid = pthread_self();
-
-    if (!jq) {
-        return JMSG_QUEUENOTFOUND;
+    if (!mq) {
+        return MSG_QUEUENOTFOUND;
     }
     lock();
     do {
-        if (jq->owningthreadid == to_thread_id) {
-            if (jq->lastfulljmessage == JMSG_EMPTY_QUEUE) {
-                jq->lastfulljmessage = 0;
-                jm = &jq->jmessagelist[0];
+        if (mq->owningthreadid == to_thread_id) {
+            if (mq->lastfulljmessage == MSG_EMPTY_QUEUE) {
+                mq->lastfulljmessage = 0;
+                m = &mq->jmessagelist[0];
             } else {
-                if (jq->lastfulljmessage + 1 > MAX_MSGS) {
+                if (mq->lastfulljmessage + 1 > MAX_MESSAGES) {
                     /* We have too many messages backed up */
                     unlock();
-                    return JMSG_QUEUEFULL;
+                    return MSG_QUEUEFULL;
                 }
-                if (jq->lastfulljmessage + 1 > (jq->queuesize - 1)) {
+                if (mq->lastfulljmessage + 1 > (mq->queuesize - 1)) {
                     /* 
                      * We're getting backed up, we need to allocate more
                      * space.  This is slowly moving the allocated message
-                     * queue memory for this thread towards the MAX_MSGS
+                     * queue memory for this thread towards the MAX_JMESSAGES
+                     * 
                      */
-                    queuespotsleft = MAX_MSGS - (jq->lastfulljmessage + 1);
-                    if (queuespotsleft > 50)
-                        queuespotsleft = 50;
-                    if (queuespotsleft > 0) {
-                        newjmqueue = realloc(jq->jmessagelist, ((jq->lastfulljmessage + 1) * sizeof(JMESSAGE)));
-                        if (!newjmqueue) {
+                    remaining_space = MAX_JMESSAGES - (mq->lastfulljmessage + 1);
+                    if (remaining_space > 50)
+                        remaining_space = 50;
+                    if (remaining_space > 0) {
+                        mqueue_new = realloc(mq->jmessagelist, ((mq->lastfulljmessage + 1) * sizeof(MESSAGE)));
+                        if (!mqueue_new) {
                             unlock();
-                            return JMSG_OUTOFMEMORY;
+                            return MSG_OUTOFMEMORY;
                         }
-                        jq->jmessagelist = newjmqueue;
-                        jq->lastfulljmessage++;
-                        jm = &jq->jmessagelist[jq->lastfulljmessage];
+                        mq->jmessagelist = mqueue_new;
+                        mq->lastfulljmessage++;
+                        m = &mq->jmessagelist[mq->lastfulljmessage];
                     } else {
-                        retval = JMSG_QUEUEFULL;
+                        retval = MSG_QUEUEFULL;
                     }
                 } else {
-                    /* It's within the bounds of the allocated message space */
-                    jm = &jq->jmessagelist[++jq->lastfulljmessage];
+                    /* It's withing the bounds of the allocated message space */
+                    m = &mq->jmessagelist[++mq->lastfulljmessage];
                 }
             }
-            if (jm) {
-                retval = JMSG_OKAY;
-                memcpy(jm, jmsg, sizeof(JMESSAGE));
-                jm->fromthread = callingthreadid;
-                jm->fromthreadname = getthreadname(callingthreadid);
+            if (m) {
+                retval = MSG_OKAY;
+                memcpy(m, msg, sizeof(MESSAGE));
+                m->fromthread = callingthreadid;
+                m->fromthreadname = getthreadname(callingthreadid);
                 /* Go ahead and increment the semaphore count in case
                  * they're calling waitmessage()
+                 * 
                  */
-                sem_post(jq->messagesignal);
+                sem_post(mq->messagesignal);
             }
             break;
         }
-        jq = jq->next;
-    } while (jq);
+        mq = mq->next;
+    } while (mq);
     unlock();
     return retval;
 }
 
-int popmessage( JMESSAGE *jmsg ) {
-    int retval = JMSG_QUEUENOTFOUND;
-    JQUEUE *jq = jqueue;
+
+int popmessage( MESSAGE *msg ) {
+    int retval = MSG_QUEUENOTFOUND;
+    MSG_Q *mq = mqueue;
     pthread_t callingthreadid = pthread_self();
-    if (!jq) {
-        return JMSG_QUEUENOTFOUND;
+    if (!mq) {
+        return MSG_QUEUENOTFOUND;
     }
-    memset(jmsg, 0, sizeof(JMESSAGE));
+    memset(msg, 0, sizeof(MESSAGE));
     lock();
     do {
-        if (jq->owningthreadid == callingthreadid) {
-            if (jq->lastfulljmessage > JMSG_EMPTY_QUEUE) {
-                memcpy(jmsg, &jq->jmessagelist[jq->lastfulljmessage], sizeof(JMESSAGE));
-                memset(&jq->jmessagelist[jq->lastfulljmessage], 0, sizeof(JMESSAGE));
-                jq->lastfulljmessage--;
-                retval = ((jq->lastfulljmessage == JMSG_EMPTY_QUEUE) ? JMSG_LASTMESSAGE : JMSG_MOREMESSAGES);
+        if (mq->owningthreadid == callingthreadid) {
+            if (mq->lastfulljmessage > MSG_EMPTY_QUEUE) {
+                memcpy(msg, &mq->jmessagelist[mq->lastfulljmessage], sizeof(MESSAGE));
+                memset(&mq->jmessagelist[mq->lastfulljmessage], 0, sizeof(MESSAGE));
+                mq->lastfulljmessage--;
+                retval = ((mq->lastfulljmessage == MSG_EMPTY_QUEUE) ? MSG_LASTMESSAGE : MSG_MOREMESSAGES);
                 /* Decrease the semaphore count because they're NOT calling waitmessage() but may later... */
-                sem_wait(jq->messagesignal);
+                sem_wait(mq->messagesignal);
             } else {
-                retval = JMSG_NOMESSAGE;
+                retval = MSG_NOMESSAGE;
             }
             break;
         }
-        jq = jq->next;
-    } while (jq);
+        mq = mq->next;
+    } while (mq);
     unlock();
     return retval;
 }
@@ -345,58 +327,54 @@ int popmessage( JMESSAGE *jmsg ) {
  * in waitmessage().  This just pulls the message off of the stack.
  * 
  */
-static int popmessagenosem( JMESSAGE *jmsg ) {
-    int retval = JMSG_QUEUENOTFOUND;
-    JQUEUE *jq = jqueue;
+static int popmessagenosem( MESSAGE *msg ) {
+    int retval = MSG_QUEUENOTFOUND;
+    MSG_Q *mq = mqueue;
     pthread_t callingthreadid = pthread_self();
-
-    if (!jq) {
-        return JMSG_QUEUENOTFOUND;
+    if (!mq) {
+        return MSG_QUEUENOTFOUND;
     }
-
     lock();
     do {
-        if (jq->owningthreadid == callingthreadid) {
-            if (jq->lastfulljmessage > JMSG_EMPTY_QUEUE) {
-                memmove(jmsg, &jq->jmessagelist[jq->lastfulljmessage], sizeof(JMESSAGE));
-                memset(&jq->jmessagelist[jq->lastfulljmessage], 0, sizeof(JMESSAGE));
-                jq->lastfulljmessage--;
-                retval = ((jq->lastfulljmessage == JMSG_EMPTY_QUEUE) ? JMSG_NOMESSAGE :
-                ((jq->lastfulljmessage == 0) ? JMSG_LASTMESSAGE : JMSG_MOREMESSAGES));
+        if (mq->owningthreadid == callingthreadid) {
+            if (mq->lastfulljmessage > MSG_EMPTY_QUEUE) {
+                memmove(msg, &mq->jmessagelist[mq->lastfulljmessage], sizeof(MESSAGE));
+                memset(&mq->jmessagelist[mq->lastfulljmessage], 0, sizeof(MESSAGE));
+                mq->lastfulljmessage--;
+                retval = ((mq->lastfulljmessage == MSG_EMPTY_QUEUE) ? MSG_NOMESSAGE :
+                ((mq->lastfulljmessage == 0) ? MSG_LASTMESSAGE : MSG_MOREMESSAGES));
             } else {
-                retval = JMSG_NOMESSAGE;
+                retval = MSG_NOMESSAGE;
             }
             break;
         }
-        jq = jq->next;
-    } while (jq);
+        mq = mq->next;
+    } while (mq);
     unlock();
     return retval;
 }
 
-int waitmessage( JMESSAGE *jmsg ) {
-
-    JQUEUE *jq = jqueue;
+int waitmessage( MESSAGE *msg ) {
+    MSG_Q *mq = mqueue;
     sem_t *waitingon = 0;
     pthread_t callingthreadid = pthread_self();
-    if (!jq) {
-        return JMSG_QUEUENOTFOUND;
+    if (!mq) {
+        return MSG_QUEUENOTFOUND;
     }
     lock();
     do {
-        if (jq->owningthreadid == callingthreadid) {
-            //printf("Waiting on semaphore %s to be signalled...\n", jq->semname);
-            waitingon = jq->messagesignal;
+        if (mq->owningthreadid == callingthreadid) {
+            //printf("Waiting on semaphore %s to be signalled...\n", mq->semname);
+            waitingon = mq->messagesignal;
             break;
         }
-        jq = jq->next;
-    } while (jq);
+        mq = mq->next;
+    } while (mq);
     unlock();
-    if (!waitingon)
-        return JMSG_QUEUENOTFOUND;
+    if (!waitingon) return MSG_QUEUENOTFOUND;
     //printf("waiting on semaphore!\n");
     sem_wait(waitingon);
-    popmessagenosem(jmsg);
+    popmessagenosem(msg);
     //printf("semaphore signalled! continuing...\n");
-    return JMSG_OKAY;
+    return MSG_OKAY;
 }

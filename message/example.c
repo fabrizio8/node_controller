@@ -1,17 +1,17 @@
 #include <signal.h>
 #include "messaging.h"
 
-#define THREAD_STARTED      JMSG_CUSTOM1
-#define THREAD_FAILED       JMSG_CUSTOM2
-#define THREAD_EXITING      JMSG_CUSTOM3
-#define THREAD_ACKNOWLEDGE  JMSG_CUSTOM4
+#define THREAD_STARTED      MSG_CUSTOM1
+#define THREAD_FAILED       MSG_CUSTOM2
+#define THREAD_EXITING      MSG_CUSTOM3
+#define THREAD_ACKNOWLEDGE  MSG_CUSTOM4
 
 void sighand( int signum ) {
-    JMESSAGE msg;
+    MESSAGE msg;
     printf("\nSignal Received! Exiting...\n");
-    msg.message = JMSG_QUIT;
+    msg.message = MSG_QUIT;
 
-/* Put this JMSG_QUIT message on the main thread's message queue 
+/* Put this MSG_QUIT message on the main thread's message queue 
 * to let the main code know to quit.*/
     pushmessage(&msg, pthread_self());
     return;
@@ -19,7 +19,7 @@ void sighand( int signum ) {
 
 void *mythread( void *_mainthreadid ) {
     pthread_t mainthreadid = (pthread_t)_mainthreadid;
-    JMESSAGE msg;
+    MESSAGE msg;
 
     signal(SIGINT, &sighand); /* CTRL-C */
 
@@ -52,7 +52,7 @@ void *mythread( void *_mainthreadid ) {
             default:
                 break;
         }
-    } while (msg.message != JMSG_QUIT);
+    } while (msg.message != MSG_QUIT);
     printf("main.c > mythread(): Got JMSG_QUIT.\n");
     msg.message = THREAD_EXITING;
     pushmessage(&msg, mainthreadid);
@@ -63,7 +63,7 @@ void *mythread( void *_mainthreadid ) {
 }
 
 int main( void ) {
-    JMESSAGE msg;
+    MESSAGE msg;
     pthread_t mythreadid;
     int ret;
 
@@ -80,7 +80,7 @@ int main( void ) {
         /* NON Blocking message queue */
         if (popmessage(&msg)) {
             switch (msg.message) {
-                case JMSG_QUIT:
+                case MSG_QUIT:
                     /* Forward the message on to any other queues */
                     if (pushmessage(&msg, mythreadid)) {
                         printf("main.c > main(): Received JMSG_QUIT. Forwarded message to mythreadid\n");
@@ -104,7 +104,7 @@ int main( void ) {
         } else { /* No messages do some important stuff */
             usleep(20000); /* Take a breather */
         }
-    } while (msg.message != JMSG_QUIT);
+    } while (msg.message != MSG_QUIT);
     printf("main.c > main(): Calling destroymessagequeue()!\n");
     destroymessagequeue();
     printf("main.c > main(): Exiting program!\n");

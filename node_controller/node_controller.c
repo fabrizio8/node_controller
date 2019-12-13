@@ -4,6 +4,7 @@
 
 #include <unistd.h>
 #include <pthread.h>
+#include <sys/msg.h>; 
 #include "buf_mgr.h"
 #include "ddonuts.h"
 

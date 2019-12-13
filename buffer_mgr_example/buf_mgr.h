@@ -58,6 +58,11 @@ typedef union{
     char buf[sizeof(MSG)];  // message as a raw byte buffer
 } MBUF;
 
+// typedef struct msgbuf {
+//     long    mtype;
+//     char    mtext[MSGSZ];
+// } message_buf;
+
 extern int errno;
 
 #endif /* #ifndef __bmgr_h */
