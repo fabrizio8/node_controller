@@ -45,6 +45,8 @@
 #define CONNECTED 200
 #define CONN_ACK  210
 
+#define NUM_NODES 3
+
 
 typedef  struct {
     int  mtype;      // what operation ?
